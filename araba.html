@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yılan Oyunu - Araba</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #1a3a52 0%, #2c5364 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        #gameWrapper {
+            max-width: 380px;
+            width: 100%;
+            background: #1a2332;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        #header {
+            background: linear-gradient(135deg, #1a2332, #2c3e50);
+            padding: 12px;
+            text-align: center;
+        }
+
+        .title {
+            color: #5dade2;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        #stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #2c3e50;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #startBtn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 12px 35px;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #startBtn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            display: none;
+            z-index: 20;
+            min-width: 220px;
+        }
+
+        #gameOver h2 {
+            font-size: 24px;
+            color: #e74c3c;
+            margin-bottom: 12px;
+        }
+
+        #gameOver p {
+            font-size: 16px;
+            margin: 6px 0;
+        }
+
+        #restartBtn {
+            margin-top: 15px;
+            padding: 10px 30px;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #controls {
+            background: #1a2332;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3d5a80, #4a6fa5);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+            touch-action: manipulation;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:active {
+            background: linear-gradient(135deg, #4a6fa5, #5b7fb8);
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bottom-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 0;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .settings-icon {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            width: 45px;
+            height: 45px;
+            background: rgba(149, 165, 166, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameWrapper">
+        <div id="header">
+            <div class="title">MuGöl GAMES</div>
+            <div class="subtitle">Araba Oyunu</div>
+            <div id="stats">
+                <div class="stat">
+                    <div class="stat-label">Puan</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">En Yüksek</div>
+                    <div class="stat-value" id="highScore">50</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Uzunluk</div>
+                    <div class="stat-value" id="distance">1</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameContainer">
+            <canvas id="gameCanvas"></canvas>
+            
+            <button id="startBtn">
+                <span>▶</span> Başla
+            </button>
+
+            <div class="settings-icon">⚙</div>
+
+            <div id="gameOver">
+                <h2>OYUN BİTTİ!</h2>
+                <p>Puanınız: <span id="finalScore">0</span></p>
+                <p>En Yüksek: <span id="finalHighScore">0</span></p>
+                <button id="restartBtn">🔄 TEKRAR OYNA</button>
+            </div>
+        </div>
+
+        <div id="controls">
+            <div class="control-row">
+                <div class="control-btn" id="upBtn">↑</div>
+            </div>
+            <div class="control-row">
+                <div class="control-btn" id="leftBtn">←</div>
+                <div class="control-btn" id="downBtn">↓</div>
+                <div class="control-btn" id="rightBtn">→</div>
+            </div>
+        </div>
+
+        <button class="bottom-btn" id="bottomStartBtn">
+            <span>▶</span> Başla
+        </button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const container = document.getElementById('gameContainer');
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+
+        let gameRunning = false;
+        let score = 0;
+        let highScore = localStorage.getItem('carGameHighScore') || 50;
+        let gameSpeed = 3;
+        let distance = 1;
+
+        const car = {
+            x: canvas.width / 2 - 17,
+            y: canvas.height - 80,
+            width: 30,
+            height: 50,
+            speed: 5
+        };
+
+        const obstacles = [];
+        const sideObjects = [];
+        let frameCount = 0;
+        const roadWidth = canvas.width * 0.5;
+        const roadStart = (canvas.width - roadWidth) / 2;
+
+        document.getElementById('highScore').textContent = highScore;
+
+        function drawCar() {
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(car.x, car.y, car.width, car.height);
+            
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(car.x + 3, car.y + 5, car.width - 6, 13);
+            
+            ctx.fillStyle = '#2980b9';
+            ctx.fillRect(car.x + 3, car.y + car.height - 16, car.width - 6, 7);
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(car.x - 2, car.y + 7, 4, 9);
+            ctx.fillRect(car.x + car.width - 2, car.y + 7, 4, 9);
+            ctx.fillRect(car.x - 2, car.y + car.height - 16, 4, 9);
+            ctx.fillRect(car.x + car.width - 2, car.y + car.height - 16, 4, 9);
+        }
+
+        function drawObstacleCar(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 30, 50);
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(x + 3, y + 5, 24, 13);
+            
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(x + 3, y + 32, 24, 7);
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(x - 2, y + 7, 4, 9);
+            ctx.fillRect(x + 28, y + 7, 4, 9);
+            ctx.fillRect(x - 2, y + 34, 4, 9);
+            ctx.fillRect(x + 28, y + 34, 4, 9);
+        }
+
+        function drawHouse(x, y) {
+            ctx.fillStyle = '#d35400';
+            ctx.fillRect(x, y + 16, 35, 28);
+            
+            ctx.fillStyle = '#c0392b';
+            ctx.beginPath();
+            ctx.moveTo(x - 3, y + 16);
+            ctx.lineTo(x + 17.5, y + 2);
+            ctx.lineTo(x + 38, y + 16);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = '#8e44ad';
+            ctx.fillRect(x + 12, y + 25, 11, 19);
+            
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(x + 5, y + 21, 7, 7);
+            ctx.fillRect(x + 23, y + 21, 7, 7);
+        }
+
+        function drawStreetLight(x, y) {
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fillRect(x + 12, y + 10, 3, 34);
+            
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(x + 7, y + 7, 14, 5);
+            
+            ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.arc(x + 14, y + 9.5, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(241, 196, 15, 0.3)';
+            ctx.beginPath();
+            ctx.arc(x + 14, y + 9.5, 7, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawShop(x, y) {
+            ctx.fillStyle = '#16a085';
+            ctx.fillRect(x, y + 10, 38, 34);
+            
+            ctx.fillStyle = '#e67e22';
+            ctx.fillRect(x - 3, y + 10, 44, 9);
+            
+            ctx.strokeStyle = '#d35400';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x + i * 10, y + 10);
+                ctx.lineTo(x + i * 10, y + 19);
+                ctx.stroke();
+            }
+            
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(x + 3, y + 22, 14, 16);
+            ctx.fillRect(x + 21, y + 22, 14, 16);
+            
+            ctx.fillStyle = '#8e44ad';
+            ctx.fillRect(x + 16, y + 24, 8, 20);
+        }
+
+        function drawTree(x, y) {
+            ctx.fillStyle = '#795548';
+            ctx.fillRect(x + 10, y + 21, 7, 23);
+            
+            ctx.fillStyle = '#27ae60';
+            ctx.beginPath();
+            ctx.arc(x + 13.5, y + 18, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(x + 7, y + 14, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(x + 20, y + 14, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function createRoadObstacle() {
+            const colors = ['#9b59b6', '#f39c12', '#2ecc71', '#3498db'];
+            const lanes = [roadStart + 20, roadStart + roadWidth / 2 - 15, roadStart + roadWidth - 50];
+            const lane = lanes[Math.floor(Math.random() * lanes.length)];
+            
+            obstacles.push({
+                x: lane,
+                y: -60,
+                width: 30,
+                height: 50,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+
+        function createSideObject() {
+            const types = ['house', 'light', 'shop', 'tree'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const side = Math.random() < 0.5 ? 'left' : 'right';
+            
+            let x;
+            if (side === 'left') {
+                x = roadStart - 42;
+            } else {
+                x = roadStart + roadWidth + 4;
+            }
+            
+            sideObjects.push({
+                x: x,
+                y: -60,
+                width: 38,
+                height: 44,
+                type: type,
+                side: side
+            });
+        }
+
+        function drawObstacles() {
+            obstacles.forEach((obs, index) => {
+                obs.y += gameSpeed;
+                
+                drawObstacleCar(obs.x, obs.y, obs.color);
+
+                if (obs.y > canvas.height) {
+                    obstacles.splice(index, 1);
+                    score += 10;
+                    distance++;
+                    document.getElementById('score').textContent = score;
+                    document.getElementById('distance').textContent = distance;
+                    
+                    if (score % 100 === 0) {
+                        gameSpeed += 0.2;
+                    }
+                }
+
+                if (checkCollision(car, obs)) {
+                    gameOver();
+                }
+            });
+
+            sideObjects.forEach((obj, index) => {
+                obj.y += gameSpeed;
+                
+                switch(obj.type) {
+                    case 'house':
+                        drawHouse(obj.x, obj.y);
+                        break;
+                    case 'light':
+                        drawStreetLight(obj.x, obj.y);
+                        break;
+                    case 'shop':
+                        drawShop(obj.x, obj.y);
+                        break;
+                    case 'tree':
+                        drawTree(obj.x, obj.y);
+                        break;
+                }
+
+                if (obj.y > canvas.height) {
+                    sideObjects.splice(index, 1);
+                }
+            });
+        }
+
+        function drawRoad() {
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(roadStart, 0, roadWidth, canvas.height);
+            
+            ctx.strokeStyle = '#ecf0f1';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(roadStart, 0);
+            ctx.lineTo(roadStart, canvas.height);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(roadStart + roadWidth, 0);
+            ctx.lineTo(roadStart + roadWidth, canvas.height);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([12, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('finalScore').textContent = score;
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('carGameHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+            }
+            
+            document.getElementById('finalHighScore').textContent = highScore;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function resetGame() {
+            score = 0;
+            distance = 1;
+            gameSpeed = 3;
+            car.x = canvas.width / 2 - 17;
+            car.y = canvas.height - 80;
+            obstacles.length = 0;
+            sideObjects.length = 0;
+            frameCount = 0;
+            document.getElementById('score').textContent = 0;
+            document.getElementById('distance').textContent = 1;
+            document.getElementById('gameOver').style.display = 'none';
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            drawRoad();
+            drawCar();
+            drawObstacles();
+
+            frameCount++;
+            if (frameCount % 70 === 0) {
+                createRoadObstacle();
+            }
+            if (frameCount % 25 === 0) {
+                createSideObject();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        const keys = {};
+        
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            keys[e.key] = true;
+            if (keys['ArrowLeft'] && car.x > roadStart + 5) car.x -= car.speed;
+            if (keys['ArrowRight'] && car.x < roadStart + roadWidth - car.width - 5) car.x += car.speed;
+            if (keys['ArrowUp'] && car.y > 0) car.y -= car.speed;
+            if (keys['ArrowDown'] && car.y < canvas.height - car.height) car.y += car.speed;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        function setupControlButton(btnId, direction) {
+            document.getElementById(btnId).addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const interval = setInterval(() => {
+                    if (!gameRunning) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    switch(direction) {
+                        case 'left':
+                            if (car.x > roadStart + 5) car.x -= car.speed;
+                            break;
+                        case 'right':
+                            if (car.x < roadStart + roadWidth - car.width - 5) car.x += car.speed;
+                            break;
+                        case 'up':
+                            if (car.y > 0) car.y -= car.speed;
+                            break;
+                        case 'down':
+                            if (car.y < canvas.height - car.height) car.y += car.speed;
+                            break;
+                    }
+                }, 16);
+                
+                const clearOnEnd = () => {
+                    clearInterval(interval);
+                    document.getElementById(btnId).removeEventListener('touchend', clearOnEnd);
+                    document.getElementById(btnId).removeEventListener('touchcancel', clearOnEnd);
+                };
+                
+                document.getElementById(btnId).addEventListener('touchend', clearOnEnd);
+                document.getElementById(btnId).addEventListener('touchcancel', clearOnEnd);
+            });
+        }
+
+        setupControlButton('leftBtn', 'left');
+        setupControlButton('rightBtn', 'right');
+        setupControlButton('upBtn', 'up');
+        setupControlButton('downBtn', 'down');
+
+        function startGame() {
+            resetGame();
+            gameRunning = true;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('bottomStartBtn').style.display = 'none';
+            gameLoop();
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('bottomStartBtn').addEventListener('click', startGame);
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            resetGame();
+            gameRunning = true;
+            gameLoop();
+        });
+    </script>
+</body>
+</html>
